@@ -9,42 +9,31 @@ public class OrdersMapper {
     private OrdersMapper(){
         throw new IllegalStateException("Utility class");
     }
-    public static OrdersData toDataForCreation(Orders orders){
-        LocalDateTime now = LocalDateTime.now();
+    public static OrdersData toData(Orders orders){
         return OrdersData.builder()
                 .id(orders.getId())
+                .documentId(orders.getDocumentId())
                 .amount(orders.getAmount())
                 .deadline(orders.getDeadline())
                 .emailAddress(orders.getEmailAddress())
-                .idEstado(orders.getIdEstado())
-                .idTipoPrestamo(orders.getIdTipoPrestamo())
-                .creationDate(now)
-                .updateDate(now)
-                .build();
-    }
-
-    public static OrdersData toDataForUpdate(Orders orders){
-        LocalDateTime now = LocalDateTime.now();
-        return OrdersData.builder()
-                .id(orders.getId())
-                .amount(orders.getAmount())
-                .deadline(orders.getDeadline())
-                .emailAddress(orders.getEmailAddress())
-                .idEstado(orders.getIdEstado())
-                .idTipoPrestamo(orders.getIdTipoPrestamo())
-                .creationDate(now)
-                .updateDate(now)
+                .idStatus(orders.getIdStatus())
+                .idLoanType(orders.getIdLoanType())
+                .creationDate(orders.getCreationDate())
+                .updateDate(orders.getUpdateDate())
                 .build();
     }
 
     public static Orders toDomain(OrdersData ordersData){
         return Orders.builder()
                 .id(ordersData.getId())
+                .documentId(ordersData.getDocumentId())
                 .amount(ordersData.getAmount())
                 .deadline(ordersData.getDeadline())
                 .emailAddress(ordersData.getEmailAddress())
-                .idEstado(ordersData.getIdEstado())
-                .idTipoPrestamo(ordersData.getIdTipoPrestamo())
+                .idStatus(ordersData.getIdStatus())
+                .idLoanType(ordersData.getIdLoanType())
+                .creationDate(ordersData.getCreationDate())
+                .updateDate(ordersData.getUpdateDate())
                 .build();
     }
 

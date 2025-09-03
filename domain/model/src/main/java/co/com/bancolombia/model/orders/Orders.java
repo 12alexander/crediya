@@ -1,8 +1,9 @@
 package co.com.bancolombia.model.orders;
 import lombok.*;
-//import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -10,70 +11,79 @@ import java.math.BigDecimal;
 @Builder(toBuilder = true)
 public class Orders {
     private String id;
+    private String documentId;
     private BigDecimal amount;
     private Integer deadline;
     private String emailAddress;
-    private String idEstado;
-    private String idTipoPrestamo;
+    private String idStatus;
+    private String idLoanType;
+    private LocalDateTime creationDate;
+    private LocalDateTime updateDate;
 
-    public static class OrdersBuilder {
-        public OrdersBuilder amount(BigDecimal amount) {
-            if(amount == null || amount.compareTo(BigDecimal.ZERO) <= 0){
-                throw new IllegalArgumentException("El Monto, tiene que ser mayor que 0");
-            }
-            return this;
+    public static Orders createNew(String documentId, BigDecimal amount, Integer deadline, 
+                                 String emailAddress, String idLoanType, String pendingStatusId) {
+        LocalDateTime now = LocalDateTime.now();
+        return Orders.builder()
+                .id(UUID.randomUUID().toString())
+                .documentId(documentId)
+                .amount(amount)
+                .deadline(deadline)
+                .emailAddress(emailAddress)
+                .idLoanType(idLoanType)
+                .idStatus(pendingStatusId)
+                .creationDate(now)
+                .updateDate(now)
+                .build();
+    }
+
+    public void validateForCreation() {
+        validateDocumentId();
+        validateAmount();
+        validateDeadline();
+        validateEmailAddress();
+        validateLoanType();
+    }
+
+    private void validateDocumentId() {
+        if (documentId == null || documentId.trim().isEmpty()) {
+            throw new IllegalArgumentException("El documento de identidad es obligatorio");
         }
-
-        public OrdersBuilder deadline(Integer deadline) {
-            if(deadline == null || deadline <= 0){
-                throw new IllegalArgumentException("El Plazo, tiene que ser mayor que 0");
-            }
-            return this;
-        }
-
-        public OrdersBuilder emailAddress(String emailAddress) {
-            if(emailAddress == null || emailAddress.trim().isEmpty()){
-                throw new IllegalArgumentException("Email no puede ser Nulo o Vacio");
-            }
-            String emailRegex = "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$";
-            if(!emailAddress.matches(emailRegex)){
-                throw new IllegalArgumentException("Email no cumple con el formato ");
-            }
-            this.emailAddress = emailAddress;
-            return this;
-        }
-
-        public OrdersBuilder idTipoPrestamo(String idTipoPrestamo) {
-            if(idTipoPrestamo == null || idTipoPrestamo.trim().isEmpty()){
-                throw new IllegalArgumentException("Tipo de Prestamo no puede ser Nulo o Vacio");
-            }
-            this.idTipoPrestamo = idTipoPrestamo.trim();
-            return this;
+        if (!documentId.matches("^[0-9]{8,12}$")) {
+            throw new IllegalArgumentException("El documento de identidad debe tener entre 8 y 12 dígitos");
         }
     }
 
-    public void  validateData(){
+    private void validateAmount() {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("El Monto, tiene que ser mayor que 0");
+            throw new IllegalArgumentException("El monto debe ser mayor que 0");
         }
+        if (amount.scale() > 2) {
+            throw new IllegalArgumentException("El monto no puede tener más de 2 decimales");
+        }
+    }
 
+    private void validateDeadline() {
         if (deadline == null || deadline <= 0) {
-            throw new IllegalArgumentException("Los apellidos no pueden ser nulos o vacíos");
+            throw new IllegalArgumentException("El plazo debe ser mayor que 0");
         }
+        if (deadline > 360) {
+            throw new IllegalArgumentException("El plazo no puede ser mayor a 360 meses");
+        }
+    }
 
+    private void validateEmailAddress() {
         if (emailAddress == null || emailAddress.trim().isEmpty()) {
-            throw new IllegalArgumentException("El correo electrónico no puede ser nulo o vacío");
+            throw new IllegalArgumentException("El correo electrónico es obligatorio");
         }
-
         String emailRegex = "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$";
         if (!emailAddress.matches(emailRegex)) {
             throw new IllegalArgumentException("El formato del correo electrónico no es válido");
         }
-
-        if (idTipoPrestamo == null || idTipoPrestamo.trim().isEmpty()) {
-            throw new IllegalArgumentException("Tipo de Prestamo no puede ser Nulo o Vacio");
-        }
-
     }
 
+    private void validateLoanType() {
+        if (idLoanType == null || idLoanType.trim().isEmpty()) {
+            throw new IllegalArgumentException("El tipo de préstamo es obligatorio");
+        }
+    }
 }

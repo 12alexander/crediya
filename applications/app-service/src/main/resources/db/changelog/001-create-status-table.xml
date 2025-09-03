@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="001-create-status-table" author="sistema">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="status"/>
+            </not>
+        </preConditions>
+
+        <comment>Crear tabla status para almacenar estados de las órdenes</comment>
+
+        <createTable tableName="status">
+            <column name="id" type="VARCHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="status"
+                             columnNames="name"
+                             constraintName="uk_status_name"/>
+
+        <createIndex tableName="status" indexName="idx_status_name">
+            <column name="name"/>
+        </createIndex>
+
+        <insert tableName="status">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="name" value="PENDING"/>
+            <column name="description" value="Orden pendiente de aprobación"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440002"/>
+            <column name="name" value="APPROVED"/>
+            <column name="description" value="Orden aprobada para procesamiento"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440003"/>
+            <column name="name" value="REJECTED"/>
+            <column name="description" value="Orden rechazada por no cumplir criterios"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440004"/>
+            <column name="name" value="PROCESSING"/>
+            <column name="description" value="Orden en proceso de desembolso"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440005"/>
+            <column name="name" value="COMPLETED"/>
+            <column name="description" value="Orden completada exitosamente"/>
+        </insert>
+
+        <insert tableName="status">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440006"/>
+            <column name="name" value="CANCELLED"/>
+            <column name="description" value="Orden cancelada por el usuario"/>
+        </insert>
+
+        <rollback>
+            <dropTable tableName="status"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

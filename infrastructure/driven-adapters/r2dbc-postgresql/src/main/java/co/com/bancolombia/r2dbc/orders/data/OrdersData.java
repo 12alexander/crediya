@@ -21,6 +21,9 @@ public class OrdersData {
     @Id
     private String id;
 
+    @Column("document_id")
+    private String documentId;
+
     @Column("amount")
     private BigDecimal amount;
 
@@ -36,10 +39,10 @@ public class OrdersData {
     @Column("update_date")
     private LocalDateTime updateDate;
 
-    @Column("id_estado")
-    private String idEstado;
+    @Column("id_status")
+    private String idStatus;
 
-    @Column("id_tipo_prestamo")
-    private String idTipoPrestamo;
+    @Column("id_loan_type")
+    private String idLoanType;
 
 }

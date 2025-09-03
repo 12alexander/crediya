@@ -1,33 +1,24 @@
 server:
-  port: 8080
+  port: 8081
 spring:
   application:
     name: "crediya"
   devtools:
     add-properties: false
-  r2dbc:
-    url: r2dbc:postgresql://localhost:5432/crediya
-    username: postgres
-    password: root
-    pool:
-      initial-size: 5
-      max-size: 10
-      max-idle-time: 30m
-      validation-query: SELECT 1
   liquibase:
     enabled: true
     change-log: classpath:db/db.changelog-master.xml
     url: jdbc:postgresql://localhost:5432/crediya
     user: postgres
-    password: root
-  adapters:
-    r2dbc:
-      host: localhost
-      port: 5432
-      database: crediya
-      schema: public
-      username: postgres
-      password: root
+    password: 123456
+adapters:
+  r2dbc:
+    host: localhost
+    port: 5432
+    database: crediya
+    schema: public
+    username: postgres
+    password: 123456
 management:
   endpoints:
     web:
@@ -51,7 +42,7 @@ springdoc:
   show-actuator: false
   packages-to-scan: co.com.bancolombia.api
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: "http://localhost:4200,http://localhost:8081"
 logging:
   level:
     root: INFO

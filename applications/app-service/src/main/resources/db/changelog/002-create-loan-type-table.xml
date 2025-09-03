@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="002-create-loan-type-table" author="sistema">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="loan_type"/>
+            </not>
+        </preConditions>
+
+        <comment>Crear tabla loan_type para almacenar tipos de préstamos</comment>
+
+        <createTable tableName="loan_type">
+            <column name="id" type="VARCHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="minimum_amount" type="DECIMAL(15,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="maximum_amount" type="DECIMAL(15,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="interest_rate" type="DECIMAL(5,4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="automatic_validation" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="loan_type"
+                             columnNames="name"
+                             constraintName="uk_loan_type_name"/>
+
+        <createIndex tableName="loan_type" indexName="idx_loan_type_name">
+            <column name="name"/>
+        </createIndex>
+
+        <createIndex tableName="loan_type" indexName="idx_loan_type_amount_range">
+            <column name="minimum_amount"/>
+            <column name="maximum_amount"/>
+        </createIndex>
+
+        <insert tableName="loan_type">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655441001"/>
+            <column name="name" value="CREDITO_LIBRE_INVERSION"/>
+            <column name="minimum_amount" value="300000"/>
+            <column name="maximum_amount" value="8000000"/>
+            <column name="interest_rate" value="0.0189"/>
+            <column name="automatic_validation" value="false"/>
+        </insert>
+
+        <insert tableName="loan_type">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655441002"/>
+            <column name="name" value="CREDITO_LIBRANZA"/>
+            <column name="minimum_amount" value="500000"/>
+            <column name="maximum_amount" value="15000000"/>
+            <column name="interest_rate" value="0.0156"/>
+            <column name="automatic_validation" value="false"/>
+        </insert>
+
+        <insert tableName="loan_type">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655441003"/>
+            <column name="name" value="MICROCREDITO"/>
+            <column name="minimum_amount" value="50000"/>
+            <column name="maximum_amount" value="1500000"/>
+            <column name="interest_rate" value="0.0299"/>
+            <column name="automatic_validation" value="true"/>
+        </insert>
+
+        <insert tableName="loan_type">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655441004"/>
+            <column name="name" value="CREDITO_VEHICULO"/>
+            <column name="minimum_amount" value="5000000"/>
+            <column name="maximum_amount" value="80000000"/>
+            <column name="interest_rate" value="0.0134"/>
+            <column name="automatic_validation" value="false"/>
+        </insert>
+
+        <insert tableName="loan_type">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655441005"/>
+            <column name="name" value="CREDITO_VIVIENDA"/>
+            <column name="minimum_amount" value="20000000"/>
+            <column name="maximum_amount" value="500000000"/>
+            <column name="interest_rate" value="0.0089"/>
+            <column name="automatic_validation" value="false"/>
+        </insert>
+
+        <rollback>
+            <dropTable tableName="loan_type"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

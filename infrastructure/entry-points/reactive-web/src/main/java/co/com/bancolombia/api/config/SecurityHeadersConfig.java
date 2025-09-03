@@ -1,25 +1,69 @@
 package co.com.bancolombia.api.config;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
-import reactor.core.publisher.Mono;
 
-@Component
-public class SecurityHeadersConfig implements WebFilter {
+/**
+ * Security headers configuration for the Crediya application.
+ * Adds security headers to all HTTP responses to enhance application security.
+ * 
+ * @author Crediya Development Team
+ */
+@Configuration
+public class SecurityHeadersConfig {
 
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        HttpHeaders headers = exchange.getResponse().getHeaders();
-        headers.set("Content-Security-Policy", "default-src 'self'; frame-ancestors 'self'; form-action 'self'");
-        headers.set("Strict-Transport-Security", "max-age=31536000;");
-        headers.set("X-Content-Type-Options", "nosniff");
-        headers.set("Server", "");
-        headers.set("Cache-Control", "no-store");
-        headers.set("Pragma", "no-cache");
-        headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-        return chain.filter(exchange);
+    /**
+     * Creates a web filter that adds security headers to all responses.
+     * 
+     * @return WebFilter that adds security headers
+     */
+    @Bean
+    public WebFilter securityHeadersWebFilter() {
+        return (exchange, chain) -> {
+            var response = exchange.getResponse();
+            var headers = response.getHeaders();
+            
+            // Prevent clickjacking attacks
+            headers.add("X-Frame-Options", "DENY");
+            
+            // Enable XSS protection
+            headers.add("X-XSS-Protection", "1; mode=block");
+            
+            // Prevent MIME type sniffing
+            headers.add("X-Content-Type-Options", "nosniff");
+            
+            // Referrer policy for privacy
+            headers.add("Referrer-Policy", "strict-origin-when-cross-origin");
+            
+            // Content Security Policy
+            headers.add("Content-Security-Policy", 
+                "default-src 'self'; " +
+                "script-src 'self' 'unsafe-inline'; " +
+                "style-src 'self' 'unsafe-inline'; " +
+                "img-src 'self' data: https:; " +
+                "font-src 'self'; " +
+                "connect-src 'self'; " +
+                "frame-ancestors 'none';"
+            );
+            
+            // Strict Transport Security (HTTPS only)
+            // Note: Only add this if the application runs over HTTPS
+            // headers.add("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+            
+            // Feature policy to restrict access to browser features
+            headers.add("Permissions-Policy", 
+                "accelerometer=(), " +
+                "camera=(), " +
+                "geolocation=(), " +
+                "gyroscope=(), " +
+                "magnetometer=(), " +
+                "microphone=(), " +
+                "payment=(), " +
+                "usb=()"
+            );
+            
+            return chain.filter(exchange);
+        };
     }
 }
