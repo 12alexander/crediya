@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8091
 spring:
   application:
     name: "crediya"
@@ -42,7 +42,7 @@ springdoc:
   show-actuator: false
   packages-to-scan: co.com.bancolombia.api
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8081"
+  allowed-origins: "http://localhost:4200,http://localhost:8091"
 logging:
   level:
     root: INFO

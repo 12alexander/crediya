@@ -30,11 +30,13 @@ public class OrdersUseCase implements IOrdersUseCase {
                                         String emailAddress, String loanTypeId) {
         
         return validateLoanType(loanTypeId)
-                .flatMap(loanType -> validateLoanAmount(amount, loanType)
-                        .then(getPendingStatusId())
-                        .flatMap(pendingStatusId -> createAndValidateOrder(
-                                documentId, amount, deadline, emailAddress, loanTypeId, pendingStatusId))
-                        .flatMap(this::saveOrder));
+                .flatMap(loanType -> {
+                    validateLoanAmountSync(amount, loanType);
+                    return getPendingStatusId()
+                            .flatMap(pendingStatusId -> createAndValidateOrder(
+                                    documentId, amount, deadline, emailAddress, loanTypeId, pendingStatusId))
+                            .flatMap(this::saveOrder);
+                });
     }
 
     private Mono<LoanType> validateLoanType(String loanTypeId) {
@@ -44,10 +46,14 @@ public class OrdersUseCase implements IOrdersUseCase {
 
     private Mono<Void> validateLoanAmount(BigDecimal amount, LoanType loanType) {
         return Mono.fromRunnable(() -> {
-            if (!loanType.isAmountValid(amount)) {
-                throw new InvalidLoanAmountException(amount, loanType.getMinimumAmount(), loanType.getMaximumAmount());
-            }
+            validateLoanAmountSync(amount, loanType);
         });
+    }
+
+    private void validateLoanAmountSync(BigDecimal amount, LoanType loanType) {
+        if (!loanType.isAmountValid(amount)) {
+            throw new InvalidLoanAmountException(amount, loanType.getMinimumAmount(), loanType.getMaximumAmount());
+        }
     }
 
     private Mono<String> getPendingStatusId() {

@@ -2,6 +2,9 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.dto.CreateLoanRequestDTO;
 import co.com.bancolombia.api.dto.LoanRequestResponseDTO;
+import co.com.bancolombia.api.dto.response.AuthResponseDTO;
+import co.com.bancolombia.api.enums.RolEnum;
+import co.com.bancolombia.api.services.AuthServiceClient;
 import co.com.bancolombia.usecase.orders.interfaces.IOrdersUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.ConstraintViolation;
@@ -25,17 +28,21 @@ public class Handler {
     
     private final IOrdersUseCase ordersUseCase;
     private final Validator validator;
+    private final AuthServiceClient authServiceClient;
 
     public Mono<ServerResponse> createLoanRequest(ServerRequest request) {
         String traceId = generateTraceId();
         log.info("[{}] Iniciando procesamiento de solicitud de préstamo", traceId);
         
-        return request.bodyToMono(CreateLoanRequestDTO.class)
+        return validateUserToken(request, RolEnum.CLIENT.getId())
+                .flatMap(authUser -> request.bodyToMono(CreateLoanRequestDTO.class)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("El cuerpo de la solicitud no puede estar vacío")))
                 .doOnNext(dto -> log.info("[{}] Datos recibidos para documento: {}", traceId, dto.getDocumentId()))
                 .flatMap(this::validateLoanRequest)
                 .flatMap(dto -> processLoanRequest(dto, traceId))
                 .flatMap(this::buildSuccessResponse)
+                )
+                .onErrorResume(this::handleError)
                 .doOnSuccess(response -> log.info("[{}] Solicitud procesada exitosamente", traceId))
                 .doOnError(error -> log.error("[{}] Error procesando solicitud: {}", traceId, error.getMessage()));
     }
@@ -46,11 +53,13 @@ public class Handler {
         
         log.info("[{}] Consultando solicitud con ID: {}", traceId, orderId);
         
-        return ordersUseCase.findById(orderId)
-                .map(this::mapToResponseDTO)
-                .flatMap(response -> ServerResponse.ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(response))
+        return validateUserToken(request, RolEnum.ADMIN.getId())
+                .flatMap(authUser -> ordersUseCase.findById(orderId)
+                        .map(this::mapToResponseDTO)
+                        .flatMap(response -> ServerResponse.ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(response)))
+                .onErrorResume(this::handleError)
                 .doOnSuccess(response -> log.info("[{}] Consulta exitosa para ID: {}", traceId, orderId))
                 .doOnError(error -> log.error("[{}] Error consultando solicitud {}: {}", traceId, orderId, error.getMessage()));
     }
@@ -106,5 +115,54 @@ public class Handler {
 
     private String generateTraceId() {
         return "TRACE-" + System.currentTimeMillis() + "-" + Thread.currentThread().getId();
+    }
+
+    private Mono<AuthResponseDTO> validateUserToken(ServerRequest request, java.util.UUID requiredRoleId) {
+        String authHeader = request.headers().firstHeader("Authorization");
+        
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return Mono.error(new RuntimeException("Authorization header missing or invalid"));
+        }
+        
+        String token = authHeader.substring(7);
+        
+        return authServiceClient.validateToken(token)
+                .flatMap(user -> {
+                    boolean allowed = user.getIdRol().equals(requiredRoleId);
+                    if (!allowed) {
+                        return Mono.error(new RuntimeException("User is not allowed"));
+                    }
+                    return Mono.just(user);
+                });
+    }
+
+    private Mono<ServerResponse> handleError(Throwable ex) {
+        if (ex instanceof ConstraintViolationException ve) {
+            return ServerResponse.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(java.util.Map.of("errors", ve.getConstraintViolations().stream()
+                            .map(violation -> violation.getMessage())
+                            .toList()));
+        } else if (ex instanceof org.springframework.web.reactive.function.client.WebClientResponseException.Unauthorized) {
+            return ServerResponse.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(java.util.Map.of("errors", "Token inválido o expirado"));
+        } else if (ex instanceof org.springframework.web.reactive.function.client.WebClientResponseException.Forbidden) {
+            return ServerResponse.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(java.util.Map.of("errors", "Acceso denegado"));
+        } else if (ex instanceof RuntimeException && ex.getMessage().contains("Authorization header")) {
+            return ServerResponse.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(java.util.Map.of("errors", "Authorization header missing or invalid"));
+        } else if (ex instanceof RuntimeException && ex.getMessage().contains("not allowed")) {
+            return ServerResponse.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(java.util.Map.of("errors", "Acceso denegado"));
+        } else {
+            return ServerResponse.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(java.util.Map.of("errors", ex.getMessage()));
+        }
     }
 }

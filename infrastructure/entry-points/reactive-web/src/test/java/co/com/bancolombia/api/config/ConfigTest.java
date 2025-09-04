@@ -2,6 +2,7 @@ package co.com.bancolombia.api.config;
 
 import co.com.bancolombia.api.Handler;
 import co.com.bancolombia.api.RouterRest;
+import co.com.bancolombia.api.services.AuthServiceClient;
 import co.com.bancolombia.usecase.orders.interfaces.IOrdersUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +22,12 @@ class ConfigTest {
     
     @MockBean
     private IOrdersUseCase ordersUseCase;
+    
+    @MockBean
+    private AuthServiceClient authServiceClient;
 
     @Test
     void testContextLoads() {
-        // Test básico para verificar que el contexto se carga correctamente con la configuración
-        // Las rutas reales han cambiado, así que no probamos endpoints específicos
     }
 
 }
