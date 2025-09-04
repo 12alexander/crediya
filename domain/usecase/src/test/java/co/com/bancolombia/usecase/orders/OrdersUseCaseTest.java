@@ -111,7 +111,7 @@ class OrdersUseCaseTest {
 
         when(loanTypeRepository.findById(loanTypeId)).thenReturn(Mono.empty());
 
-        // Act & Assert
+
         StepVerifier.create(ordersUseCase.createLoanRequest(documentId, amount, deadline, emailAddress, loanTypeId))
                 .expectError(LoanTypeNotFoundException.class)
                 .verify();
@@ -120,7 +120,6 @@ class OrdersUseCaseTest {
     @Test
     @DisplayName("Create loan request - invalid amount (too low)")
     void createLoanRequestInvalidAmountTooLow() {
-        // Arrange
         String documentId = "12345678";
         BigDecimal amount = new BigDecimal("5000"); // Below minimum
         Integer deadline = 24;
@@ -131,7 +130,6 @@ class OrdersUseCaseTest {
 
         when(loanTypeRepository.findById(loanTypeId)).thenReturn(Mono.just(loanType));
 
-        // Act & Assert
         StepVerifier.create(ordersUseCase.createLoanRequest(documentId, amount, deadline, emailAddress, loanTypeId))
                 .expectError(InvalidLoanAmountException.class)
                 .verify();
@@ -140,7 +138,6 @@ class OrdersUseCaseTest {
     @Test
     @DisplayName("Create loan request - invalid amount (too high)")
     void createLoanRequestInvalidAmountTooHigh() {
-        // Arrange
         String documentId = "12345678";
         BigDecimal amount = new BigDecimal("600000"); // Above maximum
         Integer deadline = 24;
