@@ -51,9 +51,6 @@ class RouterRestTest {
                 .build();
     }
 
-    /**
-     * Build an Orders entity from CreateLoanRequestDTO.
-     */
     private Orders buildOrdersFromRequest(CreateLoanRequestDTO request) {
         return Orders.builder()
                 .id("order-123")
@@ -87,7 +84,6 @@ class RouterRestTest {
         CreateLoanRequestDTO request = buildLoanRequest();
         Orders savedOrder = buildOrdersFromRequest(request);
 
-        // Mock CLIENT authentication for POST
         AuthResponseDTO mockClientResponse = AuthResponseDTO.builder()
                 .idUser(UUID.randomUUID())
                 .idRol(UUID.fromString("b71ed6c9-1dd9-4c14-8a4a-fe06166d5cdb")) // CLIENT
@@ -97,10 +93,8 @@ class RouterRestTest {
         when(authServiceClient.validateToken(anyString()))
                 .thenReturn(Mono.just(mockClientResponse));
 
-        // Mock validation success
         when(validator.validate(any(CreateLoanRequestDTO.class))).thenReturn(Set.of());
 
-        // Mock use case
         when(ordersUseCase.createLoanRequest(
                 anyString(), any(BigDecimal.class), any(Integer.class), anyString(), anyString()
         )).thenReturn(Mono.just(savedOrder));
@@ -136,7 +130,6 @@ class RouterRestTest {
                 .updateDate(LocalDateTime.now())
                 .build();
 
-        // Mock ADMIN authentication for GET
         AuthResponseDTO mockAdminResponse = AuthResponseDTO.builder()
                 .idUser(UUID.randomUUID())
                 .idRol(UUID.fromString("80e86d27-20a4-44be-b90d-44eeb378d409")) // ADMIN
@@ -161,9 +154,7 @@ class RouterRestTest {
                 .jsonPath("$.status").isEqualTo("PENDING");
     }
 
-    /**
-     * Test basic instantiation.
-     */
+
     @Test
     @DisplayName("RouterRest - basic instantiation")
     void routerRestBasicTest() {

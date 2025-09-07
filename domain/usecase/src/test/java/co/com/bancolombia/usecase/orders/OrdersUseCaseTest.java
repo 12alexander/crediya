@@ -44,9 +44,6 @@ class OrdersUseCaseTest {
         ordersUseCase = new OrdersUseCase(ordersRepository, loanTypeRepository);
     }
 
-    /**
-     * Build a valid LoanType for testing.
-     */
     private LoanType buildValidLoanType() {
         return LoanType.builder()
                 .id("550e8400-e29b-41d4-a716-446655441003")
@@ -58,9 +55,6 @@ class OrdersUseCaseTest {
                 .build();
     }
 
-    /**
-     * Build a valid Orders entity for testing.
-     */
     private Orders buildValidOrder() {
         return Orders.builder()
                 .id("order-123")
@@ -93,7 +87,6 @@ class OrdersUseCaseTest {
         when(ordersRepository.findPendingStatusId()).thenReturn(Mono.just(pendingStatusId));
         when(ordersRepository.save(any(Orders.class))).thenReturn(Mono.just(expectedOrder));
 
-        // Act & Assert
         StepVerifier.create(ordersUseCase.createLoanRequest(documentId, amount, deadline, emailAddress, loanTypeId))
                 .expectNext(expectedOrder)
                 .verifyComplete();
@@ -148,7 +141,6 @@ class OrdersUseCaseTest {
 
         when(loanTypeRepository.findById(loanTypeId)).thenReturn(Mono.just(loanType));
 
-        // Act & Assert
         StepVerifier.create(ordersUseCase.createLoanRequest(documentId, amount, deadline, emailAddress, loanTypeId))
                 .expectError(InvalidLoanAmountException.class)
                 .verify();
@@ -169,7 +161,6 @@ class OrdersUseCaseTest {
         when(loanTypeRepository.findById(loanTypeId)).thenReturn(Mono.just(loanType));
         when(ordersRepository.findPendingStatusId()).thenReturn(Mono.empty());
 
-        // Act & Assert
         StepVerifier.create(ordersUseCase.createLoanRequest(documentId, amount, deadline, emailAddress, loanTypeId))
                 .expectError(OrdersBusinessException.class)
                 .verify();
@@ -178,13 +169,11 @@ class OrdersUseCaseTest {
     @Test
     @DisplayName("Find by ID - success")
     void findByIdSuccess() {
-        // Arrange
         String orderId = "order-123";
         Orders expectedOrder = buildValidOrder();
 
         when(ordersRepository.findById(orderId)).thenReturn(Mono.just(expectedOrder));
 
-        // Act & Assert
         StepVerifier.create(ordersUseCase.findById(orderId))
                 .expectNext(expectedOrder)
                 .verifyComplete();
@@ -198,7 +187,7 @@ class OrdersUseCaseTest {
 
         when(ordersRepository.findById(orderId)).thenReturn(Mono.empty());
 
-        // Act & Assert
+
         StepVerifier.create(ordersUseCase.findById(orderId))
                 .expectError(OrdersBusinessException.class)
                 .verify();
@@ -213,7 +202,7 @@ class OrdersUseCaseTest {
 
         when(ordersRepository.findByDocumentId(documentId)).thenReturn(Mono.just(expectedOrder));
 
-        // Act & Assert
+
         StepVerifier.create(ordersUseCase.findByDocumentId(documentId))
                 .expectNext(expectedOrder)
                 .verifyComplete();
@@ -227,7 +216,7 @@ class OrdersUseCaseTest {
 
         when(ordersRepository.findByDocumentId(documentId)).thenReturn(Mono.empty());
 
-        // Act & Assert
+
         StepVerifier.create(ordersUseCase.findByDocumentId(documentId))
                 .expectError(OrdersBusinessException.class)
                 .verify();
@@ -236,14 +225,14 @@ class OrdersUseCaseTest {
     @Test
     @DisplayName("Find by email address - success")
     void findByEmailAddressSuccess() {
-        // Arrange
+
         String emailAddress = "test@example.com";
         Orders order1 = buildValidOrder();
         Orders order2 = order1.toBuilder().id("order-456").build();
 
         when(ordersRepository.findByEmailAddress(emailAddress)).thenReturn(Flux.just(order1, order2));
 
-        // Act & Assert
+
         StepVerifier.create(ordersUseCase.findByEmailAddress(emailAddress))
                 .expectNext(order1)
                 .expectNext(order2)
@@ -253,12 +242,12 @@ class OrdersUseCaseTest {
     @Test
     @DisplayName("Find by email address - empty result")
     void findByEmailAddressEmpty() {
-        // Arrange
+
         String emailAddress = "nonexistent@example.com";
 
         when(ordersRepository.findByEmailAddress(emailAddress)).thenReturn(Flux.empty());
 
-        // Act & Assert
+
         StepVerifier.create(ordersUseCase.findByEmailAddress(emailAddress))
                 .verifyComplete();
     }
@@ -266,13 +255,12 @@ class OrdersUseCaseTest {
     @Test
     @DisplayName("Exists by document ID and status - true")
     void existsByDocumentIdAndStatusTrue() {
-        // Arrange
+
         String documentId = "12345678";
         String statusId = "pending-status-id";
 
         when(ordersRepository.existsByDocumentIdAndStatus(documentId, statusId)).thenReturn(Mono.just(true));
 
-        // Act & Assert
         StepVerifier.create(ordersUseCase.existsByDocumentIdAndStatus(documentId, statusId))
                 .expectNext(true)
                 .verifyComplete();
@@ -281,13 +269,11 @@ class OrdersUseCaseTest {
     @Test
     @DisplayName("Exists by document ID and status - false")
     void existsByDocumentIdAndStatusFalse() {
-        // Arrange
         String documentId = "12345678";
         String statusId = "pending-status-id";
 
         when(ordersRepository.existsByDocumentIdAndStatus(documentId, statusId)).thenReturn(Mono.just(false));
-
-        // Act & Assert
+        
         StepVerifier.create(ordersUseCase.existsByDocumentIdAndStatus(documentId, statusId))
                 .expectNext(false)
                 .verifyComplete();

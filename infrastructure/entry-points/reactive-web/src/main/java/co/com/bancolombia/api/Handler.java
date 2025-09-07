@@ -130,7 +130,7 @@ public class Handler {
                 .flatMap(user -> {
                     boolean allowed = user.getIdRol().equals(requiredRoleId);
                     if (!allowed) {
-                        return Mono.error(new RuntimeException("User is not allowed"));
+                        return Mono.error(new RuntimeException(" Useris not allowed"));
                     }
                     return Mono.just(user);
                 });
