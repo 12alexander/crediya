@@ -13,13 +13,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
-/**
- * Use case implementation for loan request operations.
- * Implements business logic and orchestrates interactions between repositories.
- * 
- * @author Crediya Development Team
- */
 @RequiredArgsConstructor
 public class OrdersUseCase implements IOrdersUseCase {
     
@@ -92,9 +87,14 @@ public class OrdersUseCase implements IOrdersUseCase {
     public Flux<Orders> findByEmailAddress(String emailAddress) {
         return ordersRepository.findByEmailAddress(emailAddress);
     }
-
+    
     @Override
     public Mono<Boolean> existsByDocumentIdAndStatus(String documentId, String statusId) {
         return ordersRepository.existsByDocumentIdAndStatus(documentId, statusId);
+    }
+
+    @Override
+    public Flux<co.com.bancolombia.model.orders.PendingRequest> findPendingRequests(UUID statusId, String email, int page, int size) {
+        return ordersRepository.findPendingRequests(statusId, email, page, size);
     }
 }

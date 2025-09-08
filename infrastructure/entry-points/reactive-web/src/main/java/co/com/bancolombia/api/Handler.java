@@ -3,6 +3,7 @@ package co.com.bancolombia.api;
 import co.com.bancolombia.api.dto.CreateLoanRequestDTO;
 import co.com.bancolombia.api.dto.LoanRequestResponseDTO;
 import co.com.bancolombia.api.dto.response.AuthResponseDTO;
+import co.com.bancolombia.api.dto.response.PendingRequestResponseDTO;
 import co.com.bancolombia.api.enums.RolEnum;
 import co.com.bancolombia.api.services.AuthServiceClient;
 import co.com.bancolombia.usecase.orders.interfaces.IOrdersUseCase;
@@ -62,6 +63,79 @@ public class Handler {
                 .onErrorResume(this::handleError)
                 .doOnSuccess(response -> log.info("[{}] Consulta exitosa para ID: {}", traceId, orderId))
                 .doOnError(error -> log.error("[{}] Error consultando solicitud {}: {}", traceId, orderId, error.getMessage()));
+    }
+
+    public Mono<ServerResponse> getPendingRequests(ServerRequest request) {
+        String traceId = generateTraceId();
+        log.info("[{}] Iniciando consulta de solicitudes pendientes", traceId);
+        
+        return validateUserToken(request, RolEnum.ASSESSOR.getId())
+                .flatMap(authUser -> {
+                    String statusParam = request.queryParam("status").orElse(null);
+                    String emailParam = request.queryParam("email").orElse(null);
+                    int page = Integer.parseInt(request.queryParam("page").orElse("0"));
+                    int size = Integer.parseInt(request.queryParam("size").orElse("10"));
+                    
+                    log.info("[{}] Parámetros de consulta - status: {}, email: {}, page: {}, size: {}", 
+                             traceId, statusParam, emailParam, page, size);
+                    
+                    java.util.UUID statusId = statusParam != null ? java.util.UUID.fromString(statusParam) : null;
+                    
+                    return ordersUseCase.findPendingRequests(statusId, emailParam, page, size)
+                            .map(this::convertToDTO)
+                            .flatMap(pendingRequestDTO -> 
+                                    authServiceClient.getUserByEmailAddress(authUser.getToken(), pendingRequestDTO.getEmailAddress())
+                                    .onErrorResume(ex -> {
+                                        log.warn("[{}] No se pudo obtener datos del usuario para email: {}", traceId, pendingRequestDTO.getEmailAddress());
+                                        return Mono.empty();
+                                    })
+                                    .map(user -> enrichPendingRequestWithUserData(pendingRequestDTO, user))
+                                    .defaultIfEmpty(pendingRequestDTO)
+                            )
+                            .collectList()
+                            .flatMap(pendingRequests -> {
+                                log.info("[{}] Se encontraron {} solicitudes pendientes", traceId, pendingRequests.size());
+                                return ServerResponse.ok()
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .bodyValue(pendingRequests);
+                            });
+                })
+                .onErrorResume(this::handleError)
+                .doOnSuccess(response -> log.info("[{}] Consulta de solicitudes pendientes completada exitosamente", traceId))
+                .doOnError(error -> log.error("[{}] Error consultando solicitudes pendientes: {}", traceId, error.getMessage()));
+    }
+
+    private co.com.bancolombia.api.dto.response.PendingRequestResponseDTO convertToDTO(
+            co.com.bancolombia.model.orders.PendingRequest pendingRequest) {
+        
+        return co.com.bancolombia.api.dto.response.PendingRequestResponseDTO.builder()
+                .amount(pendingRequest.getAmount())
+                .deadline(pendingRequest.getDeadline())
+                .emailAddress(pendingRequest.getEmailAddress())
+                .name(pendingRequest.getName())
+                .loanType(pendingRequest.getLoanType())
+                .interestRate(pendingRequest.getInterestRate())
+                .status(pendingRequest.getStatus())
+                .baseSalary(pendingRequest.getBaseSalary())
+                .monthlyAmount(pendingRequest.getMonthlyAmount())
+                .build();
+    }
+
+    private co.com.bancolombia.api.dto.response.PendingRequestResponseDTO enrichPendingRequestWithUserData(
+            co.com.bancolombia.api.dto.response.PendingRequestResponseDTO pendingRequest, 
+            co.com.bancolombia.api.dto.response.UserReportResponseDTO user) {
+        
+        return co.com.bancolombia.api.dto.response.PendingRequestResponseDTO.builder()
+                .amount(pendingRequest.getAmount())
+                .deadline(pendingRequest.getDeadline())
+                .emailAddress(pendingRequest.getEmailAddress())
+                .name(user.getName() + " " + user.getLastName())
+                .loanType(pendingRequest.getLoanType())
+                .interestRate(pendingRequest.getInterestRate())
+                .status(pendingRequest.getStatus())
+                .baseSalary(user.getBaseSalary())
+                .monthlyAmount(pendingRequest.getMonthlyAmount())
+                .build();
     }
 
     private Mono<CreateLoanRequestDTO> validateLoanRequest(CreateLoanRequestDTO dto) {

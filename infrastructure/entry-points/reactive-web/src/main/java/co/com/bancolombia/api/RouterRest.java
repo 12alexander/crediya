@@ -77,6 +77,28 @@ public class RouterRest {
                                     )
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/solicitud",
+                    produces = {MediaType.APPLICATION_JSON_VALUE},
+                    method = RequestMethod.GET,
+                    beanClass = Handler.class,
+                    beanMethod = "getPendingRequests",
+                    operation = @Operation(
+                            operationId = "getPendingRequests",
+                            summary = "Consultar solicitudes pendientes",
+                            description = "Endpoint para consultar solicitudes pendientes con paginación y filtros - Solo rol Asesor",
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Lista de solicitudes pendientes"
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "403",
+                                            description = "Acceso denegado - Solo rol Asesor"
+                                    )
+                            }
+                    )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
@@ -84,6 +106,8 @@ public class RouterRest {
                         .and(accept(MediaType.APPLICATION_JSON)), 
                 handler::createLoanRequest)
                 .andRoute(GET(SOLICITUD_PATH + "/{id}"), 
-                        handler::getLoanRequest);
+                        handler::getLoanRequest)
+                .andRoute(GET(SOLICITUD_PATH), 
+                        handler::getPendingRequests);
     }
 }

@@ -30,7 +30,7 @@ public class Orders {
                 .deadline(deadline)
                 .emailAddress(emailAddress)
                 .idLoanType(idLoanType)
-                .idStatus(pendingStatusId)
+                    .idStatus(pendingStatusId)
                 .creationDate(now)
                 .updateDate(now)
                 .build();

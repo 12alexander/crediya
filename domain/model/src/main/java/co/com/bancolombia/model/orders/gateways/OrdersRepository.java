@@ -1,8 +1,11 @@
 package co.com.bancolombia.model.orders.gateways;
 
 import co.com.bancolombia.model.orders.Orders;
+import co.com.bancolombia.model.orders.PendingRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 public interface OrdersRepository {
     Mono<Orders> save(Orders orders);
@@ -11,4 +14,5 @@ public interface OrdersRepository {
     Flux<Orders> findByEmailAddress(String emailAddress);
     Mono<Boolean> existsByDocumentIdAndStatus(String documentId, String statusId);
     Mono<String> findPendingStatusId();
+    Flux<PendingRequest> findPendingRequests(UUID statusId, String email, int page, int size);
 }

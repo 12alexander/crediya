@@ -5,11 +5,15 @@ import co.com.bancolombia.model.orders.gateways.OrdersRepository;
 import co.com.bancolombia.r2dbc.orders.data.OrdersData;
 import co.com.bancolombia.r2dbc.orders.mapper.OrdersMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+
+import java.math.BigDecimal;
+import java.util.UUID;
 
 @Slf4j
 @Repository
@@ -18,6 +22,7 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
 
     private final OrdersR2dbcRepository repository;
     private final TransactionalOperator txOperator;
+    private final DatabaseClient databaseClient;
 
     @Override
     public Mono<Orders> save(Orders orders) {
@@ -95,5 +100,33 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
         log.debug("Obteniendo ID del estado PENDING");
         return repository.findPendingStatusId()
                 .doOnNext(statusId -> log.debug("ID del estado PENDING: {}", statusId));
+    }
+
+    @Override
+    public Flux<co.com.bancolombia.model.orders.PendingRequest> findPendingRequests(UUID statusId, String email, int page, int size) {
+        log.debug("Buscando solicitudes pendientes - statusId: {}, email: {}, page: {}, size: {}", 
+                  statusId, email, page, size);
+        
+        String statusIdStr = statusId != null ? statusId.toString() : null;
+        int offset = page * size;
+        
+        return repository.findPendingOrdersQuery(statusIdStr, email, offset, size)
+                .map(this::mapToPendingRequest)
+                .doOnNext(dto -> log.debug("Solicitud pendiente encontrada para email: {}", dto.getEmailAddress()))
+                .doOnComplete(() -> log.debug("Consulta de solicitudes pendientes completada"));
+    }
+
+    private co.com.bancolombia.model.orders.PendingRequest mapToPendingRequest(co.com.bancolombia.r2dbc.orders.data.OrderPendingData data) {
+        return co.com.bancolombia.model.orders.PendingRequest.builder()
+                .amount(data.getAmount())
+                .deadline(data.getDeadline())
+                .emailAddress(data.getEmailAddress())
+                .name("") // Se llena desde el microservicio auth
+                .loanType(data.getLoanType())
+                .interestRate(data.getInterestRate())
+                .status(data.getStatusOrder())
+                .baseSalary(BigDecimal.ZERO) // Se llena desde el microservicio auth
+                .monthlyAmount(data.getTotalMonthlyDebt())
+                .build();
     }
 }
