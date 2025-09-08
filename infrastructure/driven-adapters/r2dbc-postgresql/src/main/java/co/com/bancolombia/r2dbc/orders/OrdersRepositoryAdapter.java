@@ -1,7 +1,9 @@
 package co.com.bancolombia.r2dbc.orders;
 
 import co.com.bancolombia.model.orders.Orders;
+import co.com.bancolombia.model.orders.PendingRequest;
 import co.com.bancolombia.model.orders.gateways.OrdersRepository;
+import co.com.bancolombia.r2dbc.orders.data.OrderPendingData;
 import co.com.bancolombia.r2dbc.orders.data.OrdersData;
 import co.com.bancolombia.r2dbc.orders.mapper.OrdersMapper;
 import lombok.RequiredArgsConstructor;
@@ -103,7 +105,7 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
     }
 
     @Override
-    public Flux<co.com.bancolombia.model.orders.PendingRequest> findPendingRequests(UUID statusId, String email, int page, int size) {
+    public Flux<PendingRequest> findPendingRequests(UUID statusId, String email, int page, int size) {
         log.debug("Buscando solicitudes pendientes - statusId: {}, email: {}, page: {}, size: {}", 
                   statusId, email, page, size);
         
@@ -116,16 +118,16 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
                 .doOnComplete(() -> log.debug("Consulta de solicitudes pendientes completada"));
     }
 
-    private co.com.bancolombia.model.orders.PendingRequest mapToPendingRequest(co.com.bancolombia.r2dbc.orders.data.OrderPendingData data) {
-        return co.com.bancolombia.model.orders.PendingRequest.builder()
+    private PendingRequest mapToPendingRequest(OrderPendingData data) {
+        return PendingRequest.builder()
                 .amount(data.getAmount())
                 .deadline(data.getDeadline())
                 .emailAddress(data.getEmailAddress())
-                .name("") // Se llena desde el microservicio auth
+                .name("")
                 .loanType(data.getLoanType())
                 .interestRate(data.getInterestRate())
                 .status(data.getStatusOrder())
-                .baseSalary(BigDecimal.ZERO) // Se llena desde el microservicio auth
+                .baseSalary(BigDecimal.ZERO)
                 .monthlyAmount(data.getTotalMonthlyDebt())
                 .build();
     }

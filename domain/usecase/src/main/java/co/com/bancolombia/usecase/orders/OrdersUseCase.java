@@ -3,6 +3,7 @@ package co.com.bancolombia.usecase.orders;
 import co.com.bancolombia.model.loantype.LoanType;
 import co.com.bancolombia.model.loantype.gateways.LoanTypeRepository;
 import co.com.bancolombia.model.orders.Orders;
+import co.com.bancolombia.model.orders.PendingRequest;
 import co.com.bancolombia.model.orders.exceptions.InvalidLoanAmountException;
 import co.com.bancolombia.model.orders.exceptions.LoanTypeNotFoundException;
 import co.com.bancolombia.model.orders.exceptions.OrdersBusinessException;
@@ -94,7 +95,7 @@ public class OrdersUseCase implements IOrdersUseCase {
     }
 
     @Override
-    public Flux<co.com.bancolombia.model.orders.PendingRequest> findPendingRequests(UUID statusId, String email, int page, int size) {
+    public Flux<PendingRequest> findPendingRequests(UUID statusId, String email, int page, int size) {
         return ordersRepository.findPendingRequests(statusId, email, page, size);
     }
 }

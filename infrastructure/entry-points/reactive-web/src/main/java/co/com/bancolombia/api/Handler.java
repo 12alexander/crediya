@@ -4,8 +4,10 @@ import co.com.bancolombia.api.dto.CreateLoanRequestDTO;
 import co.com.bancolombia.api.dto.LoanRequestResponseDTO;
 import co.com.bancolombia.api.dto.response.AuthResponseDTO;
 import co.com.bancolombia.api.dto.response.PendingRequestResponseDTO;
+import co.com.bancolombia.api.dto.response.UserReportResponseDTO;
 import co.com.bancolombia.api.enums.RolEnum;
 import co.com.bancolombia.api.services.AuthServiceClient;
+import co.com.bancolombia.model.orders.PendingRequest;
 import co.com.bancolombia.usecase.orders.interfaces.IOrdersUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.ConstraintViolation;
@@ -105,10 +107,10 @@ public class Handler {
                 .doOnError(error -> log.error("[{}] Error consultando solicitudes pendientes: {}", traceId, error.getMessage()));
     }
 
-    private co.com.bancolombia.api.dto.response.PendingRequestResponseDTO convertToDTO(
-            co.com.bancolombia.model.orders.PendingRequest pendingRequest) {
+    private PendingRequestResponseDTO convertToDTO(
+            PendingRequest pendingRequest) {
         
-        return co.com.bancolombia.api.dto.response.PendingRequestResponseDTO.builder()
+        return PendingRequestResponseDTO.builder()
                 .amount(pendingRequest.getAmount())
                 .deadline(pendingRequest.getDeadline())
                 .emailAddress(pendingRequest.getEmailAddress())
@@ -121,11 +123,11 @@ public class Handler {
                 .build();
     }
 
-    private co.com.bancolombia.api.dto.response.PendingRequestResponseDTO enrichPendingRequestWithUserData(
-            co.com.bancolombia.api.dto.response.PendingRequestResponseDTO pendingRequest, 
-            co.com.bancolombia.api.dto.response.UserReportResponseDTO user) {
+    private PendingRequestResponseDTO enrichPendingRequestWithUserData(
+            PendingRequestResponseDTO pendingRequest,
+            UserReportResponseDTO user) {
         
-        return co.com.bancolombia.api.dto.response.PendingRequestResponseDTO.builder()
+        return PendingRequestResponseDTO.builder()
                 .amount(pendingRequest.getAmount())
                 .deadline(pendingRequest.getDeadline())
                 .emailAddress(pendingRequest.getEmailAddress())
