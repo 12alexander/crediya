@@ -15,12 +15,13 @@ import reactor.core.publisher.Mono;
 public class LoanTypeRepositoryAdapter implements LoanTypeRepository {
 
     private final LoanTypeR2dbcRepository repository;
+    private final LoanTypeMapper loanTypeMapper;
 
     @Override
     public Mono<LoanType> findById(String id) {
         log.debug("Buscando tipo de préstamo con ID: {}", id);
         return repository.findById(id)
-                .map(LoanTypeMapper::toDomain)
+                .map(loanTypeMapper::toDomain)
                 .doOnNext(loanType -> log.debug("Tipo de préstamo encontrado: {} - {}", loanType.getId(), loanType.getName()));
     }
 
@@ -28,7 +29,7 @@ public class LoanTypeRepositoryAdapter implements LoanTypeRepository {
     public Flux<LoanType> findAll() {
         log.debug("Obteniendo todos los tipos de préstamo");
         return repository.findAll()
-                .map(LoanTypeMapper::toDomain)
+                .map(loanTypeMapper::toDomain)
                 .doOnNext(loanType -> log.debug("Tipo de préstamo: {} - {}", loanType.getId(), loanType.getName()));
     }
 

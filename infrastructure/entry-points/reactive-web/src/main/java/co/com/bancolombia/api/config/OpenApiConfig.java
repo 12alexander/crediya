@@ -1,19 +1,10 @@
 package co.com.bancolombia.api.config;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
+/**
+ * @deprecated Use {@link co.com.bancolombia.api.openapi.OpenApiConfig} instead.
+ * This class is kept for backward compatibility but will be removed in future versions.
+ */
+@Deprecated(since = "1.0.0", forRemoval = true)
 public class OpenApiConfig {
-
-    @Bean
-    public OpenAPI customOpenAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("Crediya Microservice API")
-                        .version("v1.0")
-                        .description("Microservice para gestión de solicitudes de préstamo"));
-    }
+    // Configuration moved to co.com.bancolombia.api.openapi.OpenApiConfig
 }

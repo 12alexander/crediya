@@ -25,6 +25,7 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
     private final OrdersR2dbcRepository repository;
     private final TransactionalOperator txOperator;
     private final DatabaseClient databaseClient;
+    private final OrdersMapper ordersMapper;
 
     @Override
     public Mono<Orders> save(Orders orders) {
@@ -36,7 +37,7 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
                         .doOnNext(exists -> log.debug("La solicitud con ID {} {} existe", 
                                 orders.getId(), exists ? "SI" : "NO"))
                         .flatMap(exists -> {
-                            OrdersData ordersData = OrdersMapper.toData(orders);
+                            OrdersData ordersData = ordersMapper.toData(orders);
                             if (exists) {
                                 log.debug("Actualizando solicitud existente con ID: {}", orders.getId());
                                 return repository.save(ordersData); // UPDATE
@@ -55,7 +56,7 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
                                 ).then(Mono.just(ordersData)); // INSERT directo
                             }
                         })
-                        .map(OrdersMapper::toDomain)
+                        .map(ordersMapper::toDomain)
                         .doOnSuccess(savedOrder ->
                                 log.debug("Solicitud guardada exitosamente con ID: {}", savedOrder.getId())
                         )
@@ -69,7 +70,7 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
     public Mono<Orders> findById(String id) {
         log.debug("Buscando solicitud con ID: {}", id);
         return repository.findById(id)
-                .map(OrdersMapper::toDomain)
+                .map(ordersMapper::toDomain)
                 .doOnNext(order -> log.debug("Solicitud encontrada: {}", order.getId()));
     }
 
@@ -77,7 +78,7 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
     public Mono<Orders> findByDocumentId(String documentId) {
         log.debug("Buscando solicitud para documento: {}", documentId);
         return repository.findByDocumentId(documentId)
-                .map(OrdersMapper::toDomain)
+                .map(ordersMapper::toDomain)
                 .doOnNext(order -> log.debug("Solicitud encontrada para documento {}: {}", documentId, order.getId()));
     }
 
@@ -85,7 +86,7 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
     public Flux<Orders> findByEmailAddress(String emailAddress) {
         log.debug("Buscando solicitudes para email: {}", emailAddress);
         return repository.findByEmailAddress(emailAddress)
-                .map(OrdersMapper::toDomain)
+                .map(ordersMapper::toDomain)
                 .doOnNext(order -> log.debug("Solicitud encontrada para email {}: {}", emailAddress, order.getId()));
     }
 

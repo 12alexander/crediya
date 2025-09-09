@@ -168,6 +168,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
         return switch (exception.getCode()) {
             case "LOAN_TYPE_NOT_FOUND", "ORDER_NOT_FOUND" -> HttpStatus.NOT_FOUND;
             case "INVALID_LOAN_AMOUNT", "VALIDATION_ERROR" -> HttpStatus.BAD_REQUEST;
+            case "UNAUTHORIZED" -> HttpStatus.UNAUTHORIZED;
             case "PENDING_STATUS_NOT_FOUND" -> HttpStatus.INTERNAL_SERVER_ERROR;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };

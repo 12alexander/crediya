@@ -2,39 +2,22 @@ package co.com.bancolombia.r2dbc.orders.mapper;
 
 import co.com.bancolombia.model.orders.Orders;
 import co.com.bancolombia.r2dbc.orders.data.OrdersData;
+import org.mapstruct.Mapper;
 
-import java.time.LocalDateTime;
-
-public class OrdersMapper {
-    private OrdersMapper(){
-        throw new IllegalStateException("Utility class");
-    }
-    public static OrdersData toData(Orders orders){
-        return OrdersData.builder()
-                .id(orders.getId())
-                .documentId(orders.getDocumentId())
-                .amount(orders.getAmount())
-                .deadline(orders.getDeadline())
-                .emailAddress(orders.getEmailAddress())
-                .idStatus(orders.getIdStatus())
-                .idLoanType(orders.getIdLoanType())
-                .creationDate(orders.getCreationDate())
-                .updateDate(orders.getUpdateDate())
-                .build();
-    }
-
-    public static Orders toDomain(OrdersData ordersData){
-        return Orders.builder()
-                .id(ordersData.getId())
-                .documentId(ordersData.getDocumentId())
-                .amount(ordersData.getAmount())
-                .deadline(ordersData.getDeadline())
-                .emailAddress(ordersData.getEmailAddress())
-                .idStatus(ordersData.getIdStatus())
-                .idLoanType(ordersData.getIdLoanType())
-                .creationDate(ordersData.getCreationDate())
-                .updateDate(ordersData.getUpdateDate())
-                .build();
-    }
-
+/**
+ * 🎯 FIXED: MapStruct mapper for compile-time safe mapping
+ * Eliminates manual mapping errors and improves performance
+ */
+@Mapper(componentModel = "spring")
+public interface OrdersMapper {
+    
+    /**
+     * Maps domain model to data entity
+     */
+    OrdersData toData(Orders orders);
+    
+    /**
+     * Maps data entity to domain model  
+     */
+    Orders toDomain(OrdersData ordersData);
 }

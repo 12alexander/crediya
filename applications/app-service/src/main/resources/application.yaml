@@ -11,6 +11,13 @@ spring:
     url: jdbc:postgresql://localhost:5432/crediya
     user: postgres
     password: 123456
+external:
+  services:
+    auth:
+      base-url: "http://localhost:8090"
+      timeout-seconds: 30
+      max-retries: 3
+
 adapters:
   r2dbc:
     host: localhost

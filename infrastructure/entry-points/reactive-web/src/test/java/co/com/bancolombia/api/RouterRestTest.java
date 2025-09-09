@@ -2,8 +2,12 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.dto.CreateLoanRequestDTO;
 import co.com.bancolombia.api.dto.response.AuthResponseDTO;
+import co.com.bancolombia.api.dto.response.ReportBuilder;
+import co.com.bancolombia.api.handler.OrderHandler;
+import co.com.bancolombia.api.handler.ReportHandler;
 import co.com.bancolombia.api.services.AuthServiceClient;
 import co.com.bancolombia.model.orders.Orders;
+import co.com.bancolombia.transaction.TransactionalAdapter;
 import co.com.bancolombia.usecase.orders.interfaces.IOrdersUseCase;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -40,6 +44,8 @@ class RouterRestTest {
     private IOrdersUseCase ordersUseCase;
     private Validator validator;
     private AuthServiceClient authServiceClient;
+    private ReportBuilder reportBuilder;
+    private TransactionalAdapter transactionalAdapter;
 
     private CreateLoanRequestDTO buildLoanRequest() {
         return CreateLoanRequestDTO.builder()
@@ -70,10 +76,13 @@ class RouterRestTest {
         ordersUseCase = mock(IOrdersUseCase.class);
         validator = mock(Validator.class);
         authServiceClient = mock(AuthServiceClient.class);
+        reportBuilder = mock(ReportBuilder.class);
+        transactionalAdapter = mock(TransactionalAdapter.class);
 
-        Handler handler = new Handler(ordersUseCase, validator, authServiceClient);
-        RouterRest routerRest = new RouterRest();
-        RouterFunction<ServerResponse> router = routerRest.routerFunction(handler);
+        OrderHandler orderHandler = new OrderHandler(ordersUseCase, validator, authServiceClient, transactionalAdapter);
+        ReportHandler reportHandler = new ReportHandler(ordersUseCase, authServiceClient, reportBuilder);
+        RouterRest routerRest = new RouterRest(orderHandler, reportHandler);
+        RouterFunction<ServerResponse> router = routerRest.routerFunction();
 
         this.webTestClient = WebTestClient.bindToRouterFunction(router).build();
     }
@@ -98,6 +107,10 @@ class RouterRestTest {
         when(ordersUseCase.createLoanRequest(
                 anyString(), any(BigDecimal.class), any(Integer.class), anyString(), anyString()
         )).thenReturn(Mono.just(savedOrder));
+        
+        when(transactionalAdapter.executeInTransaction(any(Mono.class))).thenAnswer(
+                invocation -> invocation.getArgument(0)
+        );
 
         webTestClient.post()
                 .uri("/api/v1/solicitud")
@@ -158,7 +171,9 @@ class RouterRestTest {
     @Test
     @DisplayName("RouterRest - basic instantiation")
     void routerRestBasicTest() {
-        RouterRest routerRest = new RouterRest();
+        OrderHandler orderHandler = mock(OrderHandler.class);
+        ReportHandler reportHandler = mock(ReportHandler.class);
+        RouterRest routerRest = new RouterRest(orderHandler, reportHandler);
         assertNotNull(routerRest);
     }
 }

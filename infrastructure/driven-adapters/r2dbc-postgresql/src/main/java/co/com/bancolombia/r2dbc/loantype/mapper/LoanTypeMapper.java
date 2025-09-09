@@ -2,21 +2,22 @@ package co.com.bancolombia.r2dbc.loantype.mapper;
 
 import co.com.bancolombia.model.loantype.LoanType;
 import co.com.bancolombia.r2dbc.loantype.data.LoanTypeData;
+import org.mapstruct.Mapper;
 
-public class LoanTypeMapper {
+/**
+ * 🎯 FIXED: MapStruct mapper for compile-time safe mapping
+ * Eliminates manual mapping errors and improves performance
+ */
+@Mapper(componentModel = "spring")
+public interface LoanTypeMapper {
     
-    private LoanTypeMapper(){
-        throw new IllegalStateException("Utility class");
-    }
+    /**
+     * Maps data entity to domain model
+     */
+    LoanType toDomain(LoanTypeData loanTypeData);
     
-    public static LoanType toDomain(LoanTypeData loanTypeData){
-        return LoanType.builder()
-                .id(loanTypeData.getId())
-                .name(loanTypeData.getName())
-                .minimumAmount(loanTypeData.getMinimumAmount())
-                .maximumAmount(loanTypeData.getMaximumAmount())
-                .interestRate(loanTypeData.getInterestRate())
-                .automaticValidation(loanTypeData.getAutomaticValidation())
-                .build();
-    }
+    /**
+     * Maps domain model to data entity
+     */
+    LoanTypeData toData(LoanType loanType);
 }
