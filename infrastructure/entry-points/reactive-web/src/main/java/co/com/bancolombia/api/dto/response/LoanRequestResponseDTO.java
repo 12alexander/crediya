@@ -1,4 +1,4 @@
-package co.com.bancolombia.api.dto;
+package co.com.bancolombia.api.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,9 +17,6 @@ import java.time.LocalDateTime;
 public class LoanRequestResponseDTO {
     
     private String id;
-    
-    @JsonProperty("documento_identidad")
-    private String documentId;
     
     private BigDecimal amount;
     

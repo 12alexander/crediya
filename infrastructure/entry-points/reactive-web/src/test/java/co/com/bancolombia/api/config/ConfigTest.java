@@ -4,7 +4,7 @@ import co.com.bancolombia.api.RouterRest;
 import co.com.bancolombia.api.handler.OrderHandler;
 import co.com.bancolombia.api.handler.ReportHandler;
 import co.com.bancolombia.api.services.AuthServiceClient;
-import co.com.bancolombia.api.dto.response.ReportBuilder;
+import co.com.bancolombia.api.util.ReportBuilder;
 import co.com.bancolombia.transaction.TransactionalAdapter;
 import co.com.bancolombia.usecase.orders.interfaces.IOrdersUseCase;
 import org.junit.jupiter.api.Test;

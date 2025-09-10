@@ -58,7 +58,6 @@ class OrdersUseCaseTest {
     private Orders buildValidOrder() {
         return Orders.builder()
                 .id("order-123")
-                .documentId("12345678")
                 .amount(new BigDecimal("50000"))
                 .deadline(24)
                 .emailAddress("test@example.com")
@@ -193,34 +192,6 @@ class OrdersUseCaseTest {
                 .verify();
     }
 
-    @Test
-    @DisplayName("Find by document ID - success")
-    void findByDocumentIdSuccess() {
-        // Arrange
-        String documentId = "12345678";
-        Orders expectedOrder = buildValidOrder();
-
-        when(ordersRepository.findByDocumentId(documentId)).thenReturn(Mono.just(expectedOrder));
-
-
-        StepVerifier.create(ordersUseCase.findByDocumentId(documentId))
-                .expectNext(expectedOrder)
-                .verifyComplete();
-    }
-
-    @Test
-    @DisplayName("Find by document ID - not found")
-    void findByDocumentIdNotFound() {
-        // Arrange
-        String documentId = "non-existing-document";
-
-        when(ordersRepository.findByDocumentId(documentId)).thenReturn(Mono.empty());
-
-
-        StepVerifier.create(ordersUseCase.findByDocumentId(documentId))
-                .expectError(OrdersBusinessException.class)
-                .verify();
-    }
 
     @Test
     @DisplayName("Find by email address - success")
@@ -252,30 +223,4 @@ class OrdersUseCaseTest {
                 .verifyComplete();
     }
 
-    @Test
-    @DisplayName("Exists by document ID and status - true")
-    void existsByDocumentIdAndStatusTrue() {
-
-        String documentId = "12345678";
-        String statusId = "pending-status-id";
-
-        when(ordersRepository.existsByDocumentIdAndStatus(documentId, statusId)).thenReturn(Mono.just(true));
-
-        StepVerifier.create(ordersUseCase.existsByDocumentIdAndStatus(documentId, statusId))
-                .expectNext(true)
-                .verifyComplete();
-    }
-
-    @Test
-    @DisplayName("Exists by document ID and status - false")
-    void existsByDocumentIdAndStatusFalse() {
-        String documentId = "12345678";
-        String statusId = "pending-status-id";
-
-        when(ordersRepository.existsByDocumentIdAndStatus(documentId, statusId)).thenReturn(Mono.just(false));
-        
-        StepVerifier.create(ordersUseCase.existsByDocumentIdAndStatus(documentId, statusId))
-                .expectNext(false)
-                .verifyComplete();
-    }
 }

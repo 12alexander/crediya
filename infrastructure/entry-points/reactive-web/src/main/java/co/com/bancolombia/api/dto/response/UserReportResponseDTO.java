@@ -14,8 +14,9 @@ import java.math.BigDecimal;
 @Setter
 @Builder
 public class UserReportResponseDTO {
-    private String emailAddress;
+    private String id;
     private String name;
     private String lastName;
+    private String emailAddress;
     private BigDecimal baseSalary;
 }

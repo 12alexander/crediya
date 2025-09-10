@@ -17,9 +17,6 @@
             <column name="id" type="VARCHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="document_id" type="VARCHAR(12)">
-                <constraints nullable="false"/>
-            </column>
             <column name="amount" type="DECIMAL(15,2)">
                 <constraints nullable="false"/>
             </column>
@@ -54,10 +51,6 @@
                                  constraintName="fk_orders_loan_type"
                                  referencedTableName="loan_type"
                                  referencedColumnNames="id"/>
-
-        <createIndex tableName="orders" indexName="idx_orders_document_id">
-            <column name="document_id"/>
-        </createIndex>
 
         <createIndex tableName="orders" indexName="idx_orders_email_address">
             <column name="email_address"/>

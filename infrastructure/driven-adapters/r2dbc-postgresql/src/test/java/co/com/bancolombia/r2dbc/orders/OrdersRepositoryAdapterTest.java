@@ -24,7 +24,6 @@ class OrdersRepositoryAdapterTest {
     private Orders buildOrdersDomain() {
         return Orders.builder()
                 .id("order-123")
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(24)
                 .emailAddress("test@example.com")
@@ -44,7 +43,6 @@ class OrdersRepositoryAdapterTest {
         // Assert
         assertNotNull(order);
         assertEquals("order-123", order.getId());
-        assertEquals("12345678", order.getDocumentId());
         assertEquals(new BigDecimal("50000.00"), order.getAmount());
         assertEquals(24, order.getDeadline());
         assertEquals("test@example.com", order.getEmailAddress());
@@ -64,19 +62,6 @@ class OrdersRepositoryAdapterTest {
         assertDoesNotThrow(() -> order.validateForCreation());
     }
 
-    @Test
-    @DisplayName("Orders validation - invalid document ID")
-    void ordersValidationInvalidDocumentId() {
-        // Arrange
-        Orders order = buildOrdersDomain().toBuilder()
-                .documentId("123") // Too short
-                .build();
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> order.validateForCreation());
-        assertTrue(exception.getMessage().contains("entre 8 y 12 dígitos"));
-    }
 
     @Test
     @DisplayName("Orders validation - invalid email")
@@ -104,12 +89,11 @@ class OrdersRepositoryAdapterTest {
         String statusId = "pending-status";
 
         // Act
-        Orders newOrder = Orders.createNew(documentId, amount, deadline, emailAddress, loanTypeId, statusId);
+        Orders newOrder = Orders.createNew(amount, deadline, emailAddress, loanTypeId, statusId);
 
         // Assert
         assertNotNull(newOrder);
         assertNotNull(newOrder.getId());
-        assertEquals(documentId, newOrder.getDocumentId());
         assertEquals(amount, newOrder.getAmount());
         assertEquals(deadline, newOrder.getDeadline());
         assertEquals(emailAddress, newOrder.getEmailAddress());
@@ -128,7 +112,6 @@ class OrdersRepositoryAdapterTest {
         // Act
         Orders order = Orders.builder()
                 .id("test-order-456")
-                .documentId("11111111")
                 .amount(new BigDecimal("25000.50"))
                 .deadline(12)
                 .emailAddress("builder@test.com")
@@ -140,7 +123,6 @@ class OrdersRepositoryAdapterTest {
 
         // Assert
         assertEquals("test-order-456", order.getId());
-        assertEquals("11111111", order.getDocumentId());
         assertEquals(new BigDecimal("25000.50"), order.getAmount());
         assertEquals(12, order.getDeadline());
         assertEquals("builder@test.com", order.getEmailAddress());

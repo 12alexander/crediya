@@ -1,8 +1,9 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.api.dto.CreateLoanRequestDTO;
+import co.com.bancolombia.api.dto.request.CreateLoanRequestDTO;
 import co.com.bancolombia.api.dto.response.AuthResponseDTO;
-import co.com.bancolombia.api.dto.response.ReportBuilder;
+import co.com.bancolombia.api.dto.response.UserReportResponseDTO;
+import co.com.bancolombia.api.util.ReportBuilder;
 import co.com.bancolombia.api.handler.OrderHandler;
 import co.com.bancolombia.api.handler.ReportHandler;
 import co.com.bancolombia.api.services.AuthServiceClient;
@@ -31,8 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,7 +49,6 @@ class RouterRestTest {
 
     private CreateLoanRequestDTO buildLoanRequest() {
         return CreateLoanRequestDTO.builder()
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(24)
                 .emailAddress("test@example.com")
@@ -60,7 +59,6 @@ class RouterRestTest {
     private Orders buildOrdersFromRequest(CreateLoanRequestDTO request) {
         return Orders.builder()
                 .id("order-123")
-                .documentId(request.getDocumentId())
                 .amount(request.getAmount())
                 .deadline(request.getDeadline())
                 .emailAddress(request.getEmailAddress())
@@ -97,10 +95,21 @@ class RouterRestTest {
                 .idUser(UUID.randomUUID())
                 .idRol(UUID.fromString("b71ed6c9-1dd9-4c14-8a4a-fe06166d5cdb")) // CLIENT
                 .nameUser("Test Client User")
-                .token("mock-token")
+                .token("mock-jwt-token")
                 .build();
-        when(authServiceClient.validateToken(anyString()))
+        UserReportResponseDTO mockUserResponse = UserReportResponseDTO.builder()
+                .id(mockClientResponse.getIdUser().toString())
+                .name("Test")
+                .lastName("User")
+                .emailAddress("test@example.com")
+                .baseSalary(new BigDecimal("50000"))
+                .build();
+
+        Mockito.lenient().when(authServiceClient.validateToken(anyString()))
                 .thenReturn(Mono.just(mockClientResponse));
+
+        Mockito.lenient().when(authServiceClient.getUserByEmailAddress(anyString(), anyString()))
+                .thenReturn(Mono.just(mockUserResponse));
 
         when(validator.validate(any(CreateLoanRequestDTO.class))).thenReturn(Set.of());
 
@@ -122,7 +131,6 @@ class RouterRestTest {
                 .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.id").isEqualTo(savedOrder.getId())
-                .jsonPath("$.documento_identidad").isEqualTo(savedOrder.getDocumentId())
                 .jsonPath("$.amount").isEqualTo(savedOrder.getAmount().doubleValue())
                 .jsonPath("$.status").isEqualTo("PENDING");
     }
@@ -133,7 +141,6 @@ class RouterRestTest {
         String orderId = "order-123";
         Orders existingOrder = Orders.builder()
                 .id(orderId)
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(24)
                 .emailAddress("test@example.com")
@@ -162,7 +169,6 @@ class RouterRestTest {
                 .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.id").isEqualTo(existingOrder.getId())
-                .jsonPath("$.documento_identidad").isEqualTo(existingOrder.getDocumentId())
                 .jsonPath("$.amount").isEqualTo(existingOrder.getAmount().doubleValue())
                 .jsonPath("$.status").isEqualTo("PENDING");
     }

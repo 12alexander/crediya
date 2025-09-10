@@ -29,7 +29,7 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
 
     @Override
     public Mono<Orders> save(Orders orders) {
-        log.debug("Guardando solicitud con ID: {} y documento: {}", orders.getId(), orders.getDocumentId());
+        log.debug("Guardando solicitud con ID: {}", orders.getId());
 
         return txOperator.transactional(
                 repository.existsById(orders.getId())
@@ -45,7 +45,6 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
                                 log.debug("Insertando nueva solicitud con ID: {}", orders.getId());
                                 return repository.insertOrder(
                                         ordersData.getId(),
-                                        ordersData.getDocumentId(), 
                                         ordersData.getAmount(),
                                         ordersData.getDeadline(),
                                         ordersData.getEmailAddress(),
@@ -75,27 +74,11 @@ public class OrdersRepositoryAdapter implements OrdersRepository {
     }
 
     @Override
-    public Mono<Orders> findByDocumentId(String documentId) {
-        log.debug("Buscando solicitud para documento: {}", documentId);
-        return repository.findByDocumentId(documentId)
-                .map(ordersMapper::toDomain)
-                .doOnNext(order -> log.debug("Solicitud encontrada para documento {}: {}", documentId, order.getId()));
-    }
-
-    @Override
     public Flux<Orders> findByEmailAddress(String emailAddress) {
         log.debug("Buscando solicitudes para email: {}", emailAddress);
         return repository.findByEmailAddress(emailAddress)
                 .map(ordersMapper::toDomain)
                 .doOnNext(order -> log.debug("Solicitud encontrada para email {}: {}", emailAddress, order.getId()));
-    }
-
-    @Override
-    public Mono<Boolean> existsByDocumentIdAndStatus(String documentId, String statusId) {
-        log.debug("Verificando si existe solicitud para documento {} con estado {}", documentId, statusId);
-        return repository.existsByDocumentIdAndIdStatus(documentId, statusId)
-                .doOnNext(exists -> log.debug("Existe solicitud para documento {} con estado {}: {}", 
-                                            documentId, statusId, exists));
     }
 
     @Override

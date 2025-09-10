@@ -22,7 +22,7 @@ public class OrdersUseCase implements IOrdersUseCase {
     private final OrdersRepository ordersRepository;
     private final LoanTypeRepository loanTypeRepository;
 
-    public Mono<Orders> createLoanRequest(String documentId, BigDecimal amount, Integer deadline, 
+    public Mono<Orders> createLoanRequest(String idUser, BigDecimal amount, Integer deadline, 
                                         String emailAddress, String loanTypeId) {
         
         return validateLoanType(loanTypeId)
@@ -30,7 +30,7 @@ public class OrdersUseCase implements IOrdersUseCase {
                     validateLoanAmountSync(amount, loanType);
                     return getPendingStatusId()
                             .flatMap(pendingStatusId -> createAndValidateOrder(
-                                    documentId, amount, deadline, emailAddress, loanTypeId, pendingStatusId))
+                                    idUser, amount, deadline, emailAddress, loanTypeId, pendingStatusId))
                             .flatMap(this::saveOrder);
                 });
     }
@@ -58,10 +58,10 @@ public class OrdersUseCase implements IOrdersUseCase {
                                                                      "No se encontró el estado 'PENDING'")));
     }
 
-    private Mono<Orders> createAndValidateOrder(String documentId, BigDecimal amount, Integer deadline,
+    private Mono<Orders> createAndValidateOrder(String idUser, BigDecimal amount, Integer deadline,
                                               String emailAddress, String loanTypeId, String pendingStatusId) {
         return Mono.fromCallable(() -> {
-            Orders order = Orders.createNew(documentId, amount, deadline, emailAddress, loanTypeId, pendingStatusId);
+            Orders order = Orders.createNew(amount, deadline, emailAddress, loanTypeId, pendingStatusId);
             order.validateForCreation();
             return order;
         });
@@ -78,20 +78,8 @@ public class OrdersUseCase implements IOrdersUseCase {
     }
 
     @Override
-    public Mono<Orders> findByDocumentId(String documentId) {
-        return ordersRepository.findByDocumentId(documentId)
-                .switchIfEmpty(Mono.error(new OrdersBusinessException("ORDER_NOT_FOUND", 
-                                                                     "No se encontró solicitud para el documento: " + documentId)));
-    }
-
-    @Override
     public Flux<Orders> findByEmailAddress(String emailAddress) {
         return ordersRepository.findByEmailAddress(emailAddress);
-    }
-    
-    @Override
-    public Mono<Boolean> existsByDocumentIdAndStatus(String documentId, String statusId) {
-        return ordersRepository.existsByDocumentIdAndStatus(documentId, statusId);
     }
 
     @Override

@@ -2,14 +2,13 @@ package co.com.bancolombia.api.handler;
 
 import co.com.bancolombia.api.dto.response.AuthResponseDTO;
 import co.com.bancolombia.api.dto.response.PendingRequestResponseDTO;
-import co.com.bancolombia.api.dto.response.ReportBuilder;
+import co.com.bancolombia.api.util.ReportBuilder;
 import co.com.bancolombia.api.dto.response.UserReportResponseDTO;
 import co.com.bancolombia.api.enums.RolEnum;
 import co.com.bancolombia.api.services.AuthServiceClient;
 import co.com.bancolombia.model.orders.PendingRequest;
 import co.com.bancolombia.model.orders.exceptions.UnauthorizedException;
 import co.com.bancolombia.usecase.orders.interfaces.IOrdersUseCase;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -27,7 +26,6 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Tag(name = "Reportes", description = "Operaciones relacionadas con reportes y consultas de solicitudes pendientes")
 public class ReportHandler {
 
     private final IOrdersUseCase ordersUseCase;

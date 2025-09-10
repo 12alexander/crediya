@@ -11,7 +11,6 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 public class Orders {
     private String id;
-    private String documentId;
     private BigDecimal amount;
     private Integer deadline;
     private String emailAddress;
@@ -20,37 +19,26 @@ public class Orders {
     private LocalDateTime creationDate;
     private LocalDateTime updateDate;
 
-    public static Orders createNew(String documentId, BigDecimal amount, Integer deadline, 
+    public static Orders createNew(BigDecimal amount, Integer deadline, 
                                  String emailAddress, String idLoanType, String pendingStatusId) {
         LocalDateTime now = LocalDateTime.now();
         return Orders.builder()
                 .id(UUID.randomUUID().toString())
-                .documentId(documentId)
                 .amount(amount)
                 .deadline(deadline)
                 .emailAddress(emailAddress)
                 .idLoanType(idLoanType)
-                    .idStatus(pendingStatusId)
+                .idStatus(pendingStatusId)
                 .creationDate(now)
                 .updateDate(now)
                 .build();
     }
 
     public void validateForCreation() {
-        validateDocumentId();
         validateAmount();
         validateDeadline();
         validateEmailAddress();
         validateLoanType();
-    }
-
-    private void validateDocumentId() {
-        if (documentId == null || documentId.trim().isEmpty()) {
-            throw new IllegalArgumentException("El documento de identidad es obligatorio");
-        }
-        if (!documentId.matches("^[0-9]{8,12}$")) {
-            throw new IllegalArgumentException("El documento de identidad debe tener entre 8 y 12 dígitos");
-        }
     }
 
     private void validateAmount() {

@@ -1,5 +1,7 @@
-package co.com.bancolombia.api.dto.response;
+package co.com.bancolombia.api.util;
 
+import co.com.bancolombia.api.dto.response.PendingRequestResponseDTO;
+import co.com.bancolombia.api.dto.response.UserReportResponseDTO;
 import co.com.bancolombia.model.orders.PendingRequest;
 import org.springframework.stereotype.Component;
 

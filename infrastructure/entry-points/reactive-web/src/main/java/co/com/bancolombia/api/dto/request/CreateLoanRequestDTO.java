@@ -1,4 +1,4 @@
-package co.com.bancolombia.api.dto;
+package co.com.bancolombia.api.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -14,11 +14,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class CreateLoanRequestDTO {
-    
-    @NotBlank(message = "El documento de identidad es obligatorio")
-    @Pattern(regexp = "^[0-9]{8,12}$", message = "El documento de identidad debe tener entre 8 y 12 dígitos")
-    @JsonProperty("documento_identidad")
-    private String documentId;
     
     @NotNull(message = "El monto es obligatorio")
     @DecimalMin(value = "0.01", message = "El monto debe ser mayor que 0")

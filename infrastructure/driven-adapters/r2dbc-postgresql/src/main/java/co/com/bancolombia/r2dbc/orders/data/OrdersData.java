@@ -21,9 +21,6 @@ public class OrdersData {
     @Id
     private String id;
 
-    @Column("document_id")
-    private String documentId;
-
     @Column("amount")
     private BigDecimal amount;
 

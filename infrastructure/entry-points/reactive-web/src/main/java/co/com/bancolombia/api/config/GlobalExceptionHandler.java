@@ -1,6 +1,6 @@
 package co.com.bancolombia.api.config;
 
-import co.com.bancolombia.api.dto.ErrorResponseDTO;
+import co.com.bancolombia.api.dto.response.ErrorResponseDTO;
 import co.com.bancolombia.model.orders.exceptions.OrdersBusinessException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.UnexpectedTypeException;

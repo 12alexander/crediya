@@ -1,0 +1,53 @@
+server:
+  port: ${SERVER_PORT:8091}
+spring:
+  application:
+    name: "crediya"
+  devtools:
+    add-properties: false
+  liquibase:
+    enabled: true
+    change-log: classpath:db/db.changelog-master.xml
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+external:
+  services:
+    auth:
+      base-url: "${AUTH_SERVICE_URL}"
+      timeout-seconds: ${AUTH_TIMEOUT:10}
+      max-retries: ${AUTH_MAX_RETRIES:2}
+
+adapters:
+  r2dbc:
+    host: ${DB_HOST}
+    port: ${DB_PORT}
+    database: ${DB_NAME}
+    schema: ${DB_SCHEMA:public}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus,metrics"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+springdoc:
+  api-docs:
+    enabled: false  # Disable in production
+  swagger-ui:
+    enabled: false  # Disable in production
+cors:
+  allowed-origins: "${CORS_ALLOWED_ORIGINS}"
+logging:
+  level:
+    root: ${LOG_LEVEL:WARN}
+    co.com.bancolombia: ${LOG_LEVEL_APP:INFO}
+    co.com.bancolombia.api.handler: ${LOG_LEVEL_HANDLER:WARN}
+  file:
+    name: ${LOG_FILE_PATH:/var/logs/crediya.log}

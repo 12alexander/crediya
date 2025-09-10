@@ -20,7 +20,6 @@ class OrdersTest {
     @DisplayName("Create new order - success")
     void createNewOrderSuccess() {
         // Arrange
-        String documentId = "12345678";
         BigDecimal amount = new BigDecimal("50000.00");
         Integer deadline = 24;
         String emailAddress = "test@example.com";
@@ -28,12 +27,11 @@ class OrdersTest {
         String statusId = "pending-status-id";
 
         // Act
-        Orders order = Orders.createNew(documentId, amount, deadline, emailAddress, loanTypeId, statusId);
+        Orders order = Orders.createNew(amount, deadline, emailAddress, loanTypeId, statusId);
 
         // Assert
         assertNotNull(order);
         assertNotNull(order.getId());
-        assertEquals(documentId, order.getDocumentId());
         assertEquals(amount, order.getAmount());
         assertEquals(deadline, order.getDeadline());
         assertEquals(emailAddress, order.getEmailAddress());
@@ -48,7 +46,6 @@ class OrdersTest {
     void validateForCreationSuccess() {
         // Arrange
         Orders order = Orders.builder()
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(24)
                 .emailAddress("test@example.com")
@@ -62,69 +59,12 @@ class OrdersTest {
         assertDoesNotThrow(() -> order.validateForCreation());
     }
 
-    @Test
-    @DisplayName("Validate for creation - null document ID")
-    void validateForCreationNullDocumentId() {
-        // Arrange
-        Orders order = Orders.builder()
-                .documentId(null)
-                .amount(new BigDecimal("50000.00"))
-                .deadline(24)
-                .emailAddress("test@example.com")
-                .idLoanType("550e8400-e29b-41d4-a716-446655441003")
-                .idStatus("pending-status-id")
-                .build();
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
-                () -> order.validateForCreation());
-        assertTrue(exception.getMessage().contains("documento de identidad es obligatorio"));
-    }
-
-    @Test
-    @DisplayName("Validate for creation - empty document ID")
-    void validateForCreationEmptyDocumentId() {
-        // Arrange
-        Orders order = Orders.builder()
-                .documentId("")
-                .amount(new BigDecimal("50000.00"))
-                .deadline(24)
-                .emailAddress("test@example.com")
-                .idLoanType("550e8400-e29b-41d4-a716-446655441003")
-                .idStatus("pending-status-id")
-                .build();
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
-                () -> order.validateForCreation());
-        assertTrue(exception.getMessage().contains("documento de identidad es obligatorio"));
-    }
-
-    @Test
-    @DisplayName("Validate for creation - invalid document ID format")
-    void validateForCreationInvalidDocumentId() {
-        // Arrange
-        Orders order = Orders.builder()
-                .documentId("123") // Too short
-                .amount(new BigDecimal("50000.00"))
-                .deadline(24)
-                .emailAddress("test@example.com")
-                .idLoanType("550e8400-e29b-41d4-a716-446655441003")
-                .idStatus("pending-status-id")
-                .build();
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
-                () -> order.validateForCreation());
-        assertTrue(exception.getMessage().contains("entre 8 y 12 dígitos"));
-    }
 
     @Test
     @DisplayName("Validate for creation - null amount")
     void validateForCreationNullAmount() {
         // Arrange
         Orders order = Orders.builder()
-                .documentId("12345678")
                 .amount(null)
                 .deadline(24)
                 .emailAddress("test@example.com")
@@ -144,7 +84,6 @@ class OrdersTest {
     void validateForCreationInvalidAmount(String amountValue) {
         // Arrange
         Orders order = Orders.builder()
-                .documentId("12345678")
                 .amount(new BigDecimal(amountValue))
                 .deadline(24)
                 .emailAddress("test@example.com")
@@ -163,7 +102,6 @@ class OrdersTest {
     void validateForCreationTooManyDecimals() {
         // Arrange
         Orders order = Orders.builder()
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.123")) // 3 decimals
                 .deadline(24)
                 .emailAddress("test@example.com")
@@ -182,7 +120,6 @@ class OrdersTest {
     void validateForCreationNullDeadline() {
         // Arrange
         Orders order = Orders.builder()
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(null)
                 .emailAddress("test@example.com")
@@ -202,7 +139,6 @@ class OrdersTest {
     void validateForCreationInvalidDeadline(int deadlineValue) {
         // Arrange
         Orders order = Orders.builder()
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(deadlineValue)
                 .emailAddress("test@example.com")
@@ -221,7 +157,6 @@ class OrdersTest {
     void validateForCreationDeadlineTooHigh() {
         // Arrange
         Orders order = Orders.builder()
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(361) // More than 360
                 .emailAddress("test@example.com")
@@ -240,7 +175,6 @@ class OrdersTest {
     void validateForCreationNullEmailAddress() {
         // Arrange
         Orders order = Orders.builder()
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(24)
                 .emailAddress(null)
@@ -259,7 +193,6 @@ class OrdersTest {
     void validateForCreationInvalidEmailFormat() {
         // Arrange
         Orders order = Orders.builder()
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(24)
                 .emailAddress("invalid-email")
@@ -278,7 +211,6 @@ class OrdersTest {
     void validateForCreationNullLoanTypeId() {
         // Arrange
         Orders order = Orders.builder()
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(24)
                 .emailAddress("test@example.com")
@@ -299,7 +231,6 @@ class OrdersTest {
         LocalDateTime now = LocalDateTime.now();
         Orders order = Orders.builder()
                 .id("order-123")
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(24)
                 .emailAddress("test@example.com")
@@ -311,7 +242,6 @@ class OrdersTest {
 
         // Assert
         assertEquals("order-123", order.getId());
-        assertEquals("12345678", order.getDocumentId());
         assertEquals(new BigDecimal("50000.00"), order.getAmount());
         assertEquals(24, order.getDeadline());
         assertEquals("test@example.com", order.getEmailAddress());
@@ -328,7 +258,6 @@ class OrdersTest {
         LocalDateTime now = LocalDateTime.now();
         Orders originalOrder = Orders.builder()
                 .id("order-123")
-                .documentId("12345678")
                 .amount(new BigDecimal("50000.00"))
                 .deadline(24)
                 .emailAddress("test@example.com")
@@ -346,7 +275,6 @@ class OrdersTest {
 
         // Assert
         assertEquals("order-123", modifiedOrder.getId());
-        assertEquals("12345678", modifiedOrder.getDocumentId());
         assertEquals(new BigDecimal("75000.00"), modifiedOrder.getAmount()); // Modified
         assertEquals(36, modifiedOrder.getDeadline()); // Modified
         assertEquals("test@example.com", modifiedOrder.getEmailAddress());
