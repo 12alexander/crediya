@@ -16,6 +16,7 @@ public class ApiPaths {
 
     public static final String VALIDATE = baseURL + "/auth/validate";
     public static final String USERSBYEMAIL = baseURL + "/users/byEmail/{email}";
+    public static final String USERSBYIDUSUARIO = baseURL + "/users/byEmail/{email}";
     
     // Static instance to access configured values
     private static ApiPaths instance;

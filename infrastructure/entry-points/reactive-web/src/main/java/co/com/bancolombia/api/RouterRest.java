@@ -25,10 +25,6 @@ public class RouterRest {
     private static final String API_V1 = "/api/v1";
     private static final String SOLICITUD_PATH = API_V1 + "/solicitud";
 
-    /**
-     * Router function configuration for all API endpoints.
-     * Clean separation from OpenAPI documentation.
-     */
     @Bean
     public RouterFunction<ServerResponse> routerFunction() {
         return route(POST(SOLICITUD_PATH)

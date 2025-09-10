@@ -11,16 +11,11 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit tests for OrdersRepositoryAdapter.
- * Basic tests for data mapping and validation.
- */
+
 @ExtendWith(MockitoExtension.class)
 class OrdersRepositoryAdapterTest {
 
-    /**
-     * Build a sample Orders domain entity for testing.
-     */
+
     private Orders buildOrdersDomain() {
         return Orders.builder()
                 .id("order-123")
@@ -37,10 +32,8 @@ class OrdersRepositoryAdapterTest {
     @Test
     @DisplayName("Orders domain entity creation - success")
     void ordersDomainEntityCreationSuccess() {
-        // Arrange & Act
         Orders order = buildOrdersDomain();
 
-        // Assert
         assertNotNull(order);
         assertEquals("order-123", order.getId());
         assertEquals(new BigDecimal("50000.00"), order.getAmount());
@@ -55,10 +48,8 @@ class OrdersRepositoryAdapterTest {
     @Test
     @DisplayName("Orders validation - valid order")
     void ordersValidationValidOrder() {
-        // Arrange
         Orders order = buildOrdersDomain();
 
-        // Act & Assert
         assertDoesNotThrow(() -> order.validateForCreation());
     }
 
@@ -66,12 +57,10 @@ class OrdersRepositoryAdapterTest {
     @Test
     @DisplayName("Orders validation - invalid email")
     void ordersValidationInvalidEmail() {
-        // Arrange
         Orders order = buildOrdersDomain().toBuilder()
                 .emailAddress("invalid-email")
                 .build();
 
-        // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> order.validateForCreation());
         assertTrue(exception.getMessage().contains("formato del correo electrónico no es válido"));
@@ -80,7 +69,6 @@ class OrdersRepositoryAdapterTest {
     @Test
     @DisplayName("Orders create new - success")
     void ordersCreateNewSuccess() {
-        // Arrange
         String documentId = "87654321";
         BigDecimal amount = new BigDecimal("75000.00");
         Integer deadline = 36;
@@ -88,10 +76,8 @@ class OrdersRepositoryAdapterTest {
         String loanTypeId = "another-loan-type-id";
         String statusId = "pending-status";
 
-        // Act
         Orders newOrder = Orders.createNew(amount, deadline, emailAddress, loanTypeId, statusId);
 
-        // Assert
         assertNotNull(newOrder);
         assertNotNull(newOrder.getId());
         assertEquals(amount, newOrder.getAmount());
@@ -106,10 +92,8 @@ class OrdersRepositoryAdapterTest {
     @Test
     @DisplayName("Orders builder pattern - success")
     void ordersBuilderPatternSuccess() {
-        // Arrange
         LocalDateTime now = LocalDateTime.now();
 
-        // Act
         Orders order = Orders.builder()
                 .id("test-order-456")
                 .amount(new BigDecimal("25000.50"))
@@ -121,7 +105,6 @@ class OrdersRepositoryAdapterTest {
                 .updateDate(now)
                 .build();
 
-        // Assert
         assertEquals("test-order-456", order.getId());
         assertEquals(new BigDecimal("25000.50"), order.getAmount());
         assertEquals(12, order.getDeadline());
